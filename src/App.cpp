@@ -242,58 +242,59 @@ void App::updateWorld(double currentTime)
 		p2 = vec3(column(_lhand, 3));
 		_positionArray.push_back(p2);
 		p1 = p2;
-
+	}
 
 
 
 		//Pushed the points of the previously drawn line into the Line array.
 		//Also stores the relevent color informatiion. 
-		if (_held == FALSE && _positionArray.size() != 0) {
-			//Push back the given positionArray into the line array;
+	if (_held == FALSE && _positionArray.size() != 0) {
+		//Push back the given positionArray into the line array;
 
 
-			//for (int i = 0; i < numWindows; i++) {
-			//	_LineArray[i].push_back(_positionArray);
-			//	_colorArray[i].push_back(color);
-			//}
+		//for (int i = 0; i < numWindows; i++) {
+		//	_LineArray[i].push_back(_positionArray);
+		//	_colorArray[i].push_back(color);
+		//}
 
 
 
 
-			//Worked out all this jank so maybe it will work an ok amount or at least try to work.
-			double time = 0;
-			for (int i = 0; i < _positionArray.size(); i++) {
-				// Make sure we don't double up
-				if (i == 0 || glm::epsilonEqual(_positionArray[i], _positionArray[i - 1], (float)0.0001) != glm::tvec3<bool>(true)) {
-					if (i > 0) {
-						time += glm::sqrt(glm::length((_positionArray[i] - _positionArray[i - 1])));
-					}
-					_spline.append(time, (dvec3)_positionArray[i]);
+		//Worked out all this jank so maybe it will work an ok amount or at least try to work.
+		double time = 0;
+		for (int i = 0; i < _positionArray.size(); i++) {
+			// Make sure we don't double up
+			if (i == 0 || glm::epsilonEqual(_positionArray[i], _positionArray[i - 1], (float)0.0001) != glm::tvec3<bool>(true)) {
+				if (i > 0) {
+					time += glm::sqrt(glm::length((_positionArray[i] - _positionArray[i - 1])));
 				}
-				//setControlPoints(_positionArray, 3);
-				//_positionArray.clear();
+				_spline.append(time, (dvec3)_positionArray[i]);
 			}
+			//setControlPoints(_positionArray, 3);
+			//_positionArray.clear();
+		}
 
 
-			//Resample time
-			double interval = _spline.totalTime() / (double)( resamplePoints - 1);
+		//Resample time
+		int size = _positionArray.size();
+		double interval = _spline.totalTime() / (double)(size - 1);
 
-			// Begining and end might be snap points, so keep them the same to avoid floating point errors making them not match up any more
-			std::vector<glm::vec3> centers;
-			
-			centers.push_back(_positionArray[0]);
-			for (int i = 1; i < resamplePoints - 1; i++) {
-				glm::dvec3 pt = _spline.evaluate(i*interval);
-				centers.push_back(pt);
-			}
+		// Begining and end might be snap points, so keep them the same to avoid floating point errors making them not match up any more
+		std::vector<glm::vec3> centers;
 
-			for (int i = 0; i < numWindows; i++) {
-				_LineArray[i].push_back(centers);
-				_colorArray[i].push_back(color);
-			}
+		centers.push_back(_positionArray[0]);
+		for (int i = 1; i < size - 1; i++) {
+			glm::dvec3 pt = _spline.evaluate(i*interval);
+			centers.push_back(pt);
+		}
 
-			_positionArray.clear();
+		for (int i = 0; i < numWindows; i++) {
+			_LineArray[i].push_back(centers);
+			_colorArray[i].push_back(color);
+		}
 
+		_positionArray.clear();
+	}
 			//Creates a new line called aggLine, which, if a user has decided to use the aggrigation function
 			//(WIP) Aggline is now gonna hopefully be a spline. 
 
@@ -322,8 +323,8 @@ void App::updateWorld(double currentTime)
 				}
 			}
 		}
-	}
-}
+	
+
 
 //Some assistance with understanding how to construct the spline. 
 
@@ -422,7 +423,7 @@ void App::onRenderGraphicsScene(const VRGraphicsState &renderState) {
 	//If this was done a different way it could be placed in a more optimal position.
 
 	for (int k = 0; k < _LineArray[windowId].size(); k++) {
-		for (int i = 0; i < _LineArray[windowId][k].size(); i += 2) {
+		for (int i = 0; i < _LineArray[windowId][k].size()-1; i += 2) {
 			//Defines the normal as the midpoint between the vertex positions. The normal is then drawn to the 
 			//users eye Position.
 			vec3 p1N = eyePos - _LineArray[windowId][k][i];
