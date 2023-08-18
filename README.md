@@ -1,5 +1,5 @@
 --Neon Cave Lights
-By Charlie Roux
+By Charlotte Roux
 --Readme
 Requirements to run:
 --Running in VR
